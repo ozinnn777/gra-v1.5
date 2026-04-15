@@ -1,34 +1,29 @@
-import { useState } from "react";
+const generate = async () => {
+  if (!topic.trim()) return;
 
-export default function Home() {
-  const [resposta, setResposta] = useState(null);
+  setStep("generating");
+  setError(null);
 
-  const testar = async () => {
-    const res = await fetch("/api/generate", {
+  try {
+    const response = await fetch("/api/generate", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        topic: "teste"
-      })
+      body: JSON.stringify({ topic }),
     });
 
-    const data = await res.json();
-    setResposta(data);
-  };
+    const data = await response.json();
 
-  return (
-    <div style={{ padding: 40 }}>
-      <h1>GRA funcionando</h1>
+    if (!response.ok) {
+      throw new Error(data.error || "Erro na API");
+    }
 
-      <button onClick={testar}>
-        Testar API
-      </button>
+    setResult(data);
+    setStep("result");
 
-      {resposta && (
-        <pre>{JSON.stringify(resposta, null, 2)}</pre>
-      )}
-    </div>
-  );
-}
+  } catch (err) {
+    setError("Erro ao gerar roteiro");
+    setStep("config");
+  }
+};
