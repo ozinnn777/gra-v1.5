@@ -18,7 +18,7 @@ export default async function handler(req, res) {
 
     const result = await callAI(prompt);
 
-    return res.status(200).json({ result });
+    return res.status(200).json(result);
 
   } catch (err) {
     console.error(err);
