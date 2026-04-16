@@ -6,19 +6,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { topic, engine } = req.body;
+    const { topic, systemPrompt, provider } = req.body;
 
-    if (!topic) {
-      return res.status(400).json({ error: "Sem tema" });
-    }
+    const result = await generateScript({
+      topic,
+      systemPrompt,
+      provider
+    });
 
-    const prompt = `Create a YouTube script about: ${topic}`;
-
-    const result = await generateScript(prompt, engine);
-
-    return res.status(200).json({ result });
+    return res.status(200).json(result);
 
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: "Generation failed" });
   }
 }

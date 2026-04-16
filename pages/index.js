@@ -2,60 +2,64 @@ import { useState } from "react";
 
 export default function Home() {
   const [topic, setTopic] = useState("");
-  const [engine, setEngine] = useState("auto");
   const [result, setResult] = useState(null);
+  const [provider, setProvider] = useState("auto");
   const [loading, setLoading] = useState(false);
 
   const generate = async () => {
+    if (!topic) return;
+
     setLoading(true);
-    setResult(null);
 
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           topic,
-          engine,
-        }),
+          provider,
+          systemPrompt: buildPrompt()
+        })
       });
 
       const data = await res.json();
       setResult(data);
-    } catch (err) {
-      setResult({ error: "Erro ao gerar" });
+
+    } catch {
+      alert("Erro ao gerar");
     }
 
     setLoading(false);
   };
 
   return (
-    <div style={{ padding: 40, fontFamily: "sans-serif" }}>
-      <h1>GRA v1.5</h1>
+    <div style={{ padding: 30, fontFamily: "monospace", background: "#0a0a0f", color: "#eee", minHeight: "100vh" }}>
+      
+      <h2>GRA v1.6</h2>
 
-      <input
+      <textarea
+        placeholder="Digite o tema..."
         value={topic}
         onChange={(e) => setTopic(e.target.value)}
-        placeholder="Digite o tema..."
         style={{ width: "100%", padding: 10, marginBottom: 20 }}
       />
 
-      <h3>Motor de IA:</h3>
-
-      <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-        {["auto", "openai", "openrouter"].map((e) => (
+      <div style={{ marginBottom: 20 }}>
+        {["auto", "openrouter", "openai"].map((p) => (
           <button
-            key={e}
-            onClick={() => setEngine(e)}
+            key={p}
+            onClick={() => setProvider(p)}
             style={{
-              padding: 10,
-              background: engine === e ? "black" : "#eee",
-              color: engine === e ? "white" : "black",
+              marginRight: 10,
+              padding: 8,
+              background: provider === p ? "#6d28d9" : "#222",
+              color: "#fff",
+              border: "none"
             }}
           >
-            {e}
+            {p}
           </button>
         ))}
       </div>
@@ -64,9 +68,34 @@ export default function Home() {
         {loading ? "Gerando..." : "Gerar roteiro"}
       </button>
 
-      <pre style={{ marginTop: 20 }}>
-        {JSON.stringify(result, null, 2)}
-      </pre>
+      {result && (
+        <pre style={{ marginTop: 30, whiteSpace: "pre-wrap" }}>
+          {JSON.stringify(result, null, 2)}
+        </pre>
+      )}
     </div>
   );
+}
+
+function buildPrompt() {
+  return `
+You are GRA v1.6.
+
+Generate a cinematic storytelling script with emotional depth.
+
+Return JSON:
+{
+"title": "",
+"script": "",
+"blocks": [],
+"score": {
+"overall": 0,
+"hook_strength": 0,
+"mid_retention": 0,
+"emotional_peak": 0,
+"tts_rhythm": 0,
+"fourth_wall_impact": 0
+}
+}
+`;
 }
