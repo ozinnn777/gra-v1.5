@@ -6,10 +6,22 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { topic } = req.body;
+  try {
+    const { topic, language, channelType, duration } = req.body;
 
-  const prompt = buildPrompt(topic);
-  const result = await callAI(prompt);
+    const prompt = buildPrompt({
+      topic,
+      language,
+      channelType,
+      duration,
+    });
 
-  res.status(200).json({ result });
+    const result = await callAI(prompt);
+
+    return res.status(200).json({ result });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Erro ao gerar roteiro" });
+  }
 }
